@@ -1,0 +1,46 @@
+name: ira_app
+description: "IRA AI — Intelligent Responsive Assistant (Multimodal AI-Powered Wellness Companion)"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+  flutter: ">=3.19.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management & Dependency Injection
+  flutter_riverpod: ^2.5.1
+
+  # Declarative Routing
+  go_router: ^14.2.0
+
+  # Centralized Network Layer
+  dio: ^5.4.3+1
+
+  # Secure Storage for Auth Tokens & Credentials
+  flutter_secure_storage: ^9.2.2
+
+  # Key-Value Persistence for Non-Sensitive Preferences
+  shared_preferences: ^2.2.3
+
+  # Value Equality for Domain Entities and State Models
+  equatable: ^2.0.5
+
+  # Formatting & Internationalization
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Strict Linting Rules
+  flutter_lints: ^4.0.0
+
+  # Mocking Library for Clean Unit & Repository Tests
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
