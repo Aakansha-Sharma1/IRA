@@ -6,6 +6,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/widgets/ira_button.dart';
 import '../../../../core/widgets/ira_text_field.dart';
+import '../../../../app/router.dart';
 import '../controllers/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -20,6 +21,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+
+  static final _emailRegex = RegExp(
+    r'^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
+  );
 
   @override
   void dispose() {
@@ -36,7 +41,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           password: _passwordController.text,
         );
 
-    if (mounted && !success) {
+    if (!mounted) return;
+
+    if (success) {
+      context.go(AppRoutes.home);
+    } else {
       final failure = ref.read(authControllerProvider).failure;
       if (failure != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -107,7 +116,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter your email';
                       }
-                      if (!value.contains('@')) {
+                      if (!_emailRegex.hasMatch(value.trim())) {
                         return 'Please enter a valid email address';
                       }
                       return null;
@@ -136,8 +145,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your password';
                       }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                      if (value.length < 8) {
+                        return 'Password must be at least 8 characters';
                       }
                       return null;
                     },
@@ -157,7 +166,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: theme.textTheme.bodyMedium,
                       ),
                       TextButton(
-                        onPressed: () => context.push('/register'),
+                        onPressed: () => context.go(AppRoutes.register),
                         child: const Text('Create Account'),
                       ),
                     ],

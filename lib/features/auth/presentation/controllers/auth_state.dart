@@ -39,7 +39,6 @@ class AuthState extends Equatable {
   bool get isUnknown => status == AuthStatus.unknown;
   bool get isLoading => status == AuthStatus.loading;
   bool get isUnauthenticated => status == AuthStatus.unauthenticated;
-  bool get hasCompletedOnboarding => user?.isOnboardingCompleted ?? false;
 
   AuthState copyWith({
     AuthStatus? status,

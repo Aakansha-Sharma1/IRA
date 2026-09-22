@@ -1,25 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/config/app_config.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/secure_storage_service.dart';
-import '../../../../core/storage/storage_service.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../profile/presentation/controllers/profile_controller.dart';
 import '../../data/datasources/auth_remote_data_source.dart';
-import '../../data/datasources/mock_auth_remote_data_source.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
 import 'auth_state.dart';
 
-/// Provider for AuthRemoteDataSource
+/// Provider for AuthRemoteDataSource (always real backend)
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
-  final config = ref.watch(appConfigProvider);
-  if (config.useMockMode) {
-    AppLogger.info('AppConfig: Running in Development Mock Mode (No backend required)');
-    return MockAuthRemoteDataSource();
-  }
   final apiClient = ref.watch(apiClientProvider);
   return AuthRemoteDataSourceImpl(apiClient: apiClient);
 });
@@ -28,20 +21,26 @@ final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final remoteDataSource = ref.watch(authRemoteDataSourceProvider);
   final secureStorage = ref.watch(secureStorageServiceProvider);
-  final storageService = ref.watch(storageServiceProvider);
 
   return AuthRepositoryImpl(
     remoteDataSource: remoteDataSource,
     secureStorage: secureStorage,
-    storageService: storageService,
   );
 });
 
 /// AuthController managing authentication lifecycle for the entire application
 class AuthController extends StateNotifier<AuthState> {
   final AuthRepository _repository;
+  final void Function()? _onAuthenticated;
+  final void Function()? _onLogout;
 
-  AuthController(this._repository) : super(const AuthState.unknown()) {
+  AuthController(
+    this._repository, {
+    void Function()? onAuthenticated,
+    void Function()? onLogout,
+  })  : _onAuthenticated = onAuthenticated,
+        _onLogout = onLogout,
+        super(const AuthState.unknown()) {
     restoreSession();
   }
 
@@ -52,6 +51,7 @@ class AuthController extends StateNotifier<AuthState> {
       final user = await _repository.restoreSession();
       if (user != null) {
         state = AuthState.authenticated(user);
+        _onAuthenticated?.call();
       } else {
         state = const AuthState.unauthenticated();
       }
@@ -73,6 +73,7 @@ class AuthController extends StateNotifier<AuthState> {
         password: password,
       );
       state = AuthState.authenticated(user);
+      _onAuthenticated?.call();
       return true;
     } on AppException catch (e) {
       state = AuthState.error(
@@ -92,16 +93,15 @@ class AuthController extends StateNotifier<AuthState> {
   Future<bool> register({
     required String email,
     required String password,
-    required String displayName,
   }) async {
     state = const AuthState.loading();
     try {
       final user = await _repository.register(
         email: email.trim(),
         password: password,
-        displayName: displayName.trim(),
       );
       state = AuthState.authenticated(user);
+      _onAuthenticated?.call();
       return true;
     } on AppException catch (e) {
       state = AuthState.error(
@@ -117,18 +117,6 @@ class AuthController extends StateNotifier<AuthState> {
     }
   }
 
-  /// Complete onboarding flow
-  Future<void> completeOnboarding() async {
-    final currentUser = state.user;
-    if (currentUser == null) return;
-
-    await _repository.setOnboardingCompleted(true);
-
-    // Use copyWith to avoid a redundant network call in mock/dev mode
-    final updatedUser = currentUser.copyWith(isOnboardingCompleted: true);
-    state = AuthState.authenticated(updatedUser);
-  }
-
   /// User logout flow
   Future<void> logout() async {
     state = const AuthState.loading();
@@ -137,6 +125,7 @@ class AuthController extends StateNotifier<AuthState> {
     } catch (e) {
       AppLogger.warning('Logout non-fatal error', e);
     } finally {
+      _onLogout?.call();
       state = const AuthState.unauthenticated();
     }
   }
@@ -146,5 +135,13 @@ class AuthController extends StateNotifier<AuthState> {
 final authControllerProvider =
     StateNotifierProvider<AuthController, AuthState>((ref) {
   final repository = ref.watch(authRepositoryProvider);
-  return AuthController(repository);
+  return AuthController(
+    repository,
+    onAuthenticated: () {
+      ref.read(profileControllerProvider.notifier).fetchProfile();
+    },
+    onLogout: () {
+      ref.read(profileControllerProvider.notifier).clearProfile();
+    },
+  );
 });

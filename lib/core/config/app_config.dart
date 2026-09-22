@@ -28,7 +28,6 @@ class AppConfig {
   final Duration connectTimeout;
   final Duration receiveTimeout;
   final bool enableDebugLogs;
-  final bool useMockMode;
 
   const AppConfig({
     required this.environment,
@@ -36,7 +35,6 @@ class AppConfig {
     this.connectTimeout = const Duration(seconds: 15),
     this.receiveTimeout = const Duration(seconds: 15),
     this.enableDebugLogs = true,
-    this.useMockMode = true,
   });
 
   /// Factory resolving configuration from dart-define or default dev settings.
@@ -53,11 +51,6 @@ class AppConfig {
       defaultValue: '',
     );
 
-    const useMock = bool.fromEnvironment(
-      'USE_MOCK_MODE',
-      defaultValue: true,
-    );
-
     final resolvedApiUrl = apiUrl.isNotEmpty ? apiUrl : switch (env) {
       AppEnvironmentType.development => defaultDevUrl,
       AppEnvironmentType.staging => 'https://staging-api.ira-ai.internal/api/v1',
@@ -68,7 +61,6 @@ class AppConfig {
       environment: env,
       apiBaseUrl: resolvedApiUrl,
       enableDebugLogs: env != AppEnvironmentType.production,
-      useMockMode: env == AppEnvironmentType.production ? false : useMock,
     );
   }
 

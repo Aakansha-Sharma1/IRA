@@ -4,31 +4,27 @@ import 'package:equatable/equatable.dart';
 class AuthUser extends Equatable {
   final String id;
   final String email;
-  final String displayName;
-  final bool isOnboardingCompleted;
   final DateTime createdAt;
+  final DateTime? updatedAt;
 
   const AuthUser({
     required this.id,
     required this.email,
-    required this.displayName,
-    required this.isOnboardingCompleted,
     required this.createdAt,
+    this.updatedAt,
   });
 
   AuthUser copyWith({
     String? id,
     String? email,
-    String? displayName,
-    bool? isOnboardingCompleted,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return AuthUser(
       id: id ?? this.id,
       email: email ?? this.email,
-      displayName: displayName ?? this.displayName,
-      isOnboardingCompleted: isOnboardingCompleted ?? this.isOnboardingCompleted,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
@@ -36,8 +32,7 @@ class AuthUser extends Equatable {
   List<Object?> get props => [
         id,
         email,
-        displayName,
-        isOnboardingCompleted,
         createdAt,
+        updatedAt,
       ];
 }

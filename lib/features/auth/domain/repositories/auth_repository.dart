@@ -15,7 +15,6 @@ abstract class AuthRepository {
   Future<AuthUser> register({
     required String email,
     required String password,
-    required String displayName,
   });
 
   /// Terminate active session and purge credentials securely
@@ -23,7 +22,4 @@ abstract class AuthRepository {
 
   /// Retrieve the current user profile from the backend
   Future<AuthUser> getCurrentUser();
-
-  /// Update the onboarding completed status locally and on backend
-  Future<void> setOnboardingCompleted(bool completed);
 }

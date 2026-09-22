@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/router.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/widgets/ira_button.dart';
 import '../../../../core/widgets/ira_text_field.dart';
@@ -16,16 +17,21 @@ class RegisterScreen extends ConsumerStatefulWidget {
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
+  static final _emailRegex = RegExp(
+    r'^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
+  );
 
   @override
   void dispose() {
-    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -35,10 +41,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final success = await ref.read(authControllerProvider.notifier).register(
           email: _emailController.text,
           password: _passwordController.text,
-          displayName: _nameController.text,
         );
 
-    if (mounted && !success) {
+    if (!mounted) return;
+
+    if (success) {
+      context.go(AppRoutes.home);
+    } else {
       final failure = ref.read(authControllerProvider).failure;
       if (failure != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -71,32 +80,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Begin Your Wellness Journey',
+                    'Begin Your Journey',
                     style: theme.textTheme.headlineSmall,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppDimensions.space8),
                   Text(
-                    'Create an account to start daily reflections with IRA',
+                    'Create an account to get started with IRA',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppDimensions.space32),
-                  IraTextField(
-                    controller: _nameController,
-                    label: 'Full Name',
-                    hintText: 'Enter your preferred name',
-                    prefixIcon: const Icon(Icons.person_outline),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your name';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppDimensions.space16),
                   IraTextField(
                     controller: _emailController,
                     label: 'Email',
@@ -107,8 +103,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter your email';
                       }
-                      if (!value.contains('@')) {
-                        return 'Please enter a valid email';
+                      if (!_emailRegex.hasMatch(value.trim())) {
+                        return 'Please enter a valid email address';
                       }
                       return null;
                     },
@@ -142,6 +138,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       return null;
                     },
                   ),
+                  const SizedBox(height: AppDimensions.space16),
+                  IraTextField(
+                    controller: _confirmPasswordController,
+                    label: 'Confirm Password',
+                    hintText: 'Re-enter your password',
+                    obscureText: _obscureConfirmPassword,
+                    prefixIcon: const Icon(Icons.lock_clock_outlined),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureConfirmPassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                        });
+                      },
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please confirm your password';
+                      }
+                      if (value != _passwordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
+                  ),
                   const SizedBox(height: AppDimensions.space24),
                   IraButton(
                     text: 'Register',
@@ -157,7 +182,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         style: theme.textTheme.bodyMedium,
                       ),
                       TextButton(
-                        onPressed: () => context.pop(),
+                        onPressed: () => context.go(AppRoutes.login),
                         child: const Text('Sign In'),
                       ),
                     ],

@@ -14,8 +14,6 @@ void main() {
   final testUser = AuthUser(
     id: 'user_123',
     email: 'test@ira.ai',
-    displayName: 'Aakansha',
-    isOnboardingCompleted: true,
     createdAt: DateTime(2026, 1, 1),
   );
 
@@ -28,8 +26,6 @@ void main() {
       when(() => mockRepository.restoreSession()).thenAnswer((_) async => testUser);
 
       final controller = AuthController(mockRepository);
-
-      // Wait for restoreSession to complete
       await Future<void>.delayed(Duration.zero);
 
       expect(controller.state.status, equals(AuthStatus.authenticated));
@@ -40,7 +36,6 @@ void main() {
       when(() => mockRepository.restoreSession()).thenAnswer((_) async => null);
 
       final controller = AuthController(mockRepository);
-
       await Future<void>.delayed(Duration.zero);
 
       expect(controller.state.status, equals(AuthStatus.unauthenticated));
@@ -85,6 +80,46 @@ void main() {
       expect(result, isFalse);
       expect(controller.state.status, equals(AuthStatus.error));
       expect(controller.state.failure?.message, equals('Invalid credentials.'));
+    });
+
+    test('Register success updates state to authenticated', () async {
+      when(() => mockRepository.restoreSession()).thenAnswer((_) async => null);
+      when(() => mockRepository.register(
+            email: 'new@ira.ai',
+            password: 'password123',
+          )).thenAnswer((_) async => testUser);
+
+      final controller = AuthController(mockRepository);
+      await Future<void>.delayed(Duration.zero);
+
+      final result = await controller.register(
+        email: 'new@ira.ai',
+        password: 'password123',
+      );
+
+      expect(result, isTrue);
+      expect(controller.state.status, equals(AuthStatus.authenticated));
+      expect(controller.state.user, equals(testUser));
+    });
+
+    test('Register failure updates state to error with domain message', () async {
+      when(() => mockRepository.restoreSession()).thenAnswer((_) async => null);
+      when(() => mockRepository.register(
+            email: 'exists@ira.ai',
+            password: 'password123',
+          )).thenThrow(const ValidationException(message: 'Email is already registered.'));
+
+      final controller = AuthController(mockRepository);
+      await Future<void>.delayed(Duration.zero);
+
+      final result = await controller.register(
+        email: 'exists@ira.ai',
+        password: 'password123',
+      );
+
+      expect(result, isFalse);
+      expect(controller.state.status, equals(AuthStatus.error));
+      expect(controller.state.failure?.message, equals('Email is already registered.'));
     });
 
     test('Logout resets state to unauthenticated', () async {

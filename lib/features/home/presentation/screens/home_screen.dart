@@ -13,7 +13,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final authState = ref.watch(authControllerProvider);
-    final userName = authState.user?.displayName ?? 'Friend';
+    final userName = authState.user?.email.split('@').first ?? 'Friend';
 
     final featureTiles = [
       _FeatureTile(
