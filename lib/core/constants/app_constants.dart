@@ -13,6 +13,6 @@ abstract final class AppConstants {
 
   // Network Timeouts
   static const Duration defaultConnectTimeout = Duration(seconds: 15);
-  static const Duration defaultReceiveTimeout = Duration(seconds: 15);
+  static const Duration defaultReceiveTimeout = Duration(seconds: 60);
   static const Duration defaultSendTimeout = Duration(seconds: 15);
 }

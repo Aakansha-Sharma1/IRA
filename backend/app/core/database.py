@@ -1,7 +1,8 @@
 import logging
-from typing import AsyncGenerator, Optional
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from typing import AsyncGenerator
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 from app.core.config import settings
 
 logger = logging.getLogger("ira.database")
@@ -11,8 +12,7 @@ engine = create_async_engine(
     echo=False,
     future=True,
     pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
+    poolclass=NullPool,
 )
 
 AsyncSessionLocal = async_sessionmaker(
@@ -31,14 +31,15 @@ async def connect_to_database() -> bool:
         async with engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
         is_connected = True
-        logger.info("Connected to PostgreSQL successfully at %s", settings.DATABASE_URL)
+        db_target = settings.DATABASE_URL.split("@")[-1]
+        logger.info("Connected to PostgreSQL successfully at %s", db_target)
         return True
     except Exception as e:
         is_connected = False
         logger.error(
             "\n" + "=" * 60 + "\n"
             "[IRA BACKEND] POSTGRESQL NOT CONNECTED!\n"
-            f"Could not connect to PostgreSQL at: {settings.DATABASE_URL}\n"
+            f"Could not connect to PostgreSQL at: {settings.DATABASE_URL.split('@')[-1]}\n"
             f"Error: {e}\n"
             "Please ensure PostgreSQL service is running and DATABASE_URL is correct.\n"
             + "=" * 60 + "\n"

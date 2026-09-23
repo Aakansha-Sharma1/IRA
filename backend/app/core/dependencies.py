@@ -6,8 +6,13 @@ from app.core.database import get_db
 from app.core.security import decode_access_token
 from app.repositories.user_repository import UserRepository
 from app.repositories.profile_repository import ProfileRepository
+from app.repositories.conversation_repository import ConversationRepository
 from app.services.auth_service import AuthService
 from app.services.profile_service import ProfileService
+from app.services.conversation_service import ConversationService
+from app.services.ai_service import AIService
+from app.services.ai_factory import create_ai_service
+from app.core.config import settings
 from app.schemas.auth import UserResponse
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
@@ -27,6 +32,24 @@ def get_auth_service(repo: UserRepository = Depends(get_user_repository)) -> Aut
 
 def get_profile_service(repo: ProfileRepository = Depends(get_profile_repository)) -> ProfileService:
     return ProfileService(repo)
+
+
+def get_conversation_repository(
+    session: AsyncSession = Depends(get_db),
+) -> ConversationRepository:
+    return ConversationRepository(session)
+
+
+def get_ai_service() -> AIService:
+    return create_ai_service(settings)
+
+
+def get_conversation_service(
+    conversation_repo: ConversationRepository = Depends(get_conversation_repository),
+    profile_repo: ProfileRepository = Depends(get_profile_repository),
+    ai_service: AIService = Depends(get_ai_service),
+) -> ConversationService:
+    return ConversationService(conversation_repo, profile_repo, ai_service)
 
 
 async def get_current_user(

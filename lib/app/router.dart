@@ -3,10 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/presentation/controllers/auth_controller.dart';
-import '../features/auth/presentation/screens/authenticated_home_placeholder.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
 import '../features/auth/presentation/screens/splash_screen.dart';
+import '../features/chat/presentation/controllers/chat_controller.dart';
+import '../features/chat/presentation/controllers/conversation_list_controller.dart';
+import '../features/chat/presentation/screens/chat_screen.dart';
+import '../features/chat/presentation/screens/conversation_history_screen.dart';
+import '../features/home/presentation/screens/home_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/profile/presentation/controllers/profile_controller.dart';
 import '../features/profile/presentation/screens/profile_screen.dart';
@@ -19,6 +23,10 @@ abstract final class AppRoutes {
   static const String onboarding = '/onboarding';
   static const String home = '/home';
   static const String profile = '/profile';
+  static const String conversations = '/conversations';
+  static const String chat = '/chat/:conversationId';
+
+  static String chatPath(String conversationId) => '/chat/$conversationId';
 }
 
 /// Global key for navigation state
@@ -73,7 +81,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         return AppRoutes.home;
       }
 
-      // 6. Allow access to requested authenticated route (/home, /profile)
+      // 6. Allow access to requested authenticated route
       return null;
     },
     routes: [
@@ -100,12 +108,25 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.home,
         name: 'home',
-        builder: (context, state) => const AuthenticatedHomePlaceholder(),
+        builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
         path: AppRoutes.profile,
         name: 'profile',
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.conversations,
+        name: 'conversations',
+        builder: (context, state) => const ConversationHistoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.chat,
+        name: 'chat',
+        builder: (context, state) {
+          final conversationId = state.pathParameters['conversationId'] ?? '';
+          return ChatScreen(conversationId: conversationId);
+        },
       ),
     ],
   );

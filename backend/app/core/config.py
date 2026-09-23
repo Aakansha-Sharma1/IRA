@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql+asyncpg://postgres@127.0.0.1:5432/ira_db"
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/ira_db"
 
     JWT_SECRET_KEY: str = "ira-development-secret-key-replace-in-production-min-32-chars-long!"
     JWT_ALGORITHM: str = "HS256"
@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     PORT: int = 8000
     ENVIRONMENT: str = "development"
     CORS_ORIGINS: Union[List[str], str] = ["*"]
+
+    AI_PROVIDER: str = "gemini"
+    AI_API_KEY: str = ""
+    AI_MODEL: str = "gemini-2.0-flash"
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod

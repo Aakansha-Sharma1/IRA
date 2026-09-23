@@ -33,7 +33,7 @@ class AppConfig {
     required this.environment,
     required this.apiBaseUrl,
     this.connectTimeout = const Duration(seconds: 15),
-    this.receiveTimeout = const Duration(seconds: 15),
+    this.receiveTimeout = const Duration(seconds: 60),
     this.enableDebugLogs = true,
   });
 

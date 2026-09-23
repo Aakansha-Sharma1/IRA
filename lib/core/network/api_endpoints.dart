@@ -31,4 +31,11 @@ abstract final class ApiEndpoints {
 
   // User Profile
   static const String profile = '/profile';
+
+  // Conversations
+  static const String conversations = '/conversations';
+
+  static String conversation(String id) => '/conversations/$id';
+
+  static String conversationMessages(String id) => '/conversations/$id/messages';
 }

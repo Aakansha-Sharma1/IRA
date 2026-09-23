@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.core.database import connect_to_database, close_database_connection, is_connected
 from app.api.routes.auth import router as auth_router
 from app.api.routes.profile import router as profile_router
+from app.api.routes.conversations import router as conversations_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,7 +24,7 @@ async def lifespan(app: FastAPI):
         logger.warning(
             "\n" + "!" * 70 + "\n"
             "IRA Backend started with POSTGRESQL NOT CONNECTED!\n"
-            f"Configured Database URL: {settings.DATABASE_URL}\n"
+            f"Configured Database: {settings.DATABASE_URL.split('@')[-1]}\n"
             "Auth and Profile endpoints will fail until PostgreSQL is reachable.\n"
             + "!" * 70
         )
@@ -53,6 +54,7 @@ app.add_middleware(
 # API v1 Routers
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(profile_router, prefix="/api/v1")
+app.include_router(conversations_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])

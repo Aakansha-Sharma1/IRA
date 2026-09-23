@@ -6,6 +6,8 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/secure_storage_service.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../profile/presentation/controllers/profile_controller.dart';
+import '../../../chat/presentation/controllers/chat_controller.dart';
+import '../../../chat/presentation/controllers/conversation_list_controller.dart';
 import '../../data/datasources/auth_remote_data_source.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -142,6 +144,8 @@ final authControllerProvider =
     },
     onLogout: () {
       ref.read(profileControllerProvider.notifier).clearProfile();
+      ref.read(conversationListControllerProvider.notifier).clear();
+      ref.invalidate(chatControllerProvider);
     },
   );
 });
