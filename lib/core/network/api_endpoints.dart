@@ -12,9 +12,10 @@ abstract final class ApiEndpoints {
   static const String onboarding = '/onboarding';
 
   // Wellness & Mood
-  static const String mood = '/mood';
+  static const String moods = '/moods';
   static const String wellnessCheckIn = '/wellness/check-in';
   static const String journal = '/journal';
+  static String mood(String id) => '/moods/$id';
   static const String goals = '/goals';
 
   // Analytics & Insights

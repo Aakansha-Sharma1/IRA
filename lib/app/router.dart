@@ -6,14 +6,15 @@ import '../features/auth/presentation/controllers/auth_controller.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
 import '../features/auth/presentation/screens/splash_screen.dart';
-import '../features/chat/presentation/controllers/chat_controller.dart';
-import '../features/chat/presentation/controllers/conversation_list_controller.dart';
 import '../features/chat/presentation/screens/chat_screen.dart';
 import '../features/chat/presentation/screens/conversation_history_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
+import '../features/mood/presentation/screens/daily_checkin_screen.dart';
+import '../features/mood/presentation/screens/mood_history_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/profile/presentation/controllers/profile_controller.dart';
 import '../features/profile/presentation/screens/profile_screen.dart';
+import '../features/voice/presentation/screens/voice_screen.dart';
 
 /// Central route constants
 abstract final class AppRoutes {
@@ -24,6 +25,10 @@ abstract final class AppRoutes {
   static const String home = '/home';
   static const String profile = '/profile';
   static const String conversations = '/conversations';
+  static const String dailyCheckIn = '/daily-checkin';
+  static const String moodHistory = '/mood-history';
+  static const String voice = '/voice';
+  static const String voiceLive = '/voice-live';
   static const String chat = '/chat/:conversationId';
 
   static String chatPath(String conversationId) => '/chat/$conversationId';
@@ -119,6 +124,26 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.conversations,
         name: 'conversations',
         builder: (context, state) => const ConversationHistoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.dailyCheckIn,
+        name: 'dailyCheckIn',
+        builder: (context, state) => const DailyCheckInScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.moodHistory,
+        name: 'moodHistory',
+        builder: (context, state) => const MoodHistoryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.voice,
+        name: 'voice',
+        builder: (context, state) => const VoiceScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.voiceLive,
+        name: 'voice-live',
+        builder: (context, state) => const LiveVoiceChatScreen(),
       ),
       GoRoute(
         path: AppRoutes.chat,

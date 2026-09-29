@@ -12,9 +12,11 @@ class FakeAIService(AIService):
         self.reply = reply
         self.calls = 0
         self.fail_next = False
+        self.last_system_prompt: str | None = None
 
     async def generate_reply(self, *, system_prompt: str, history: list[ChatTurn]) -> str:
         self.calls += 1
+        self.last_system_prompt = system_prompt
         if self.fail_next:
             self.fail_next = False
             raise AIServiceError("Simulated AI provider failure.", status_code=502)
@@ -204,3 +206,52 @@ async def test_ai_failure_does_not_persist_assistant_message(fake_ai):
         assert len(messages) == 1
         assert messages[0]["role"] == "user"
         assert all(item["role"] != "assistant" for item in messages)
+
+
+@pytest.mark.asyncio
+async def test_onboarding_profile_personalizes_ai_prompt(fake_ai):
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        password = "TestPassword123!"
+        email = f"personalized_{uuid.uuid4().hex[:8]}@example.com"
+        reg = await client.post(
+            "/api/v1/auth/register",
+            json={"email": email, "password": password},
+        )
+        assert reg.status_code == 201
+        token = reg.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        profile = await client.post(
+            "/api/v1/profile",
+            headers=headers,
+            json={
+                "display_name": "Maya",
+                "companion_name": "Ari",
+                "gender": "Female",
+                "age": 29,
+                "pronouns": "she/her",
+                "timezone": "UTC",
+                "wellness_goals": ["A coach to help me reach my goals"],
+                "activity_level": "moderate",
+                "onboarding_completed": True,
+            },
+        )
+        assert profile.status_code == 201
+
+        conversation = await client.post("/api/v1/conversations", headers=headers, json={})
+        conversation_id = conversation.json()["id"]
+
+        sent = await client.post(
+            f"/api/v1/conversations/{conversation_id}/messages",
+            headers=headers,
+            json={"content": "I need help getting back on track with sleep."},
+        )
+        assert sent.status_code == 201
+
+        prompt = fake_ai.last_system_prompt or ""
+        assert "Ari" in prompt
+        assert "Maya" in prompt
+        assert "she/her" in prompt.lower()
+        assert "29" in prompt
+        assert "A coach to help me reach my goals" in prompt

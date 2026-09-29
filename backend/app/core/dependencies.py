@@ -7,9 +7,11 @@ from app.core.security import decode_access_token
 from app.repositories.user_repository import UserRepository
 from app.repositories.profile_repository import ProfileRepository
 from app.repositories.conversation_repository import ConversationRepository
+from app.repositories.mood_repository import MoodRepository
 from app.services.auth_service import AuthService
 from app.services.profile_service import ProfileService
 from app.services.conversation_service import ConversationService
+from app.services.mood_service import MoodService
 from app.services.ai_service import AIService
 from app.services.ai_factory import create_ai_service
 from app.core.config import settings
@@ -40,6 +42,12 @@ def get_conversation_repository(
     return ConversationRepository(session)
 
 
+def get_mood_repository(
+    session: AsyncSession = Depends(get_db),
+) -> MoodRepository:
+    return MoodRepository(session)
+
+
 def get_ai_service() -> AIService:
     return create_ai_service(settings)
 
@@ -50,6 +58,12 @@ def get_conversation_service(
     ai_service: AIService = Depends(get_ai_service),
 ) -> ConversationService:
     return ConversationService(conversation_repo, profile_repo, ai_service)
+
+
+def get_mood_service(
+    mood_repo: MoodRepository = Depends(get_mood_repository),
+) -> MoodService:
+    return MoodService(mood_repo)
 
 
 async def get_current_user(

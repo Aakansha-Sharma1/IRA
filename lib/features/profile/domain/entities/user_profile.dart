@@ -5,8 +5,10 @@ class UserProfile extends Equatable {
   final String id;
   final String userId;
   final String displayName;
+  final String companionName;
   final int? age;
   final String? gender;
+  final String pronouns;
   final String timezone;
   final List<String> wellnessGoals;
   final double? sleepHoursTarget;
@@ -19,8 +21,10 @@ class UserProfile extends Equatable {
     required this.id,
     required this.userId,
     required this.displayName,
+    this.companionName = 'IRA',
     this.age,
     this.gender,
+    this.pronouns = 'she/her',
     required this.timezone,
     this.wellnessGoals = const [],
     this.sleepHoursTarget = 8.0,
@@ -34,8 +38,10 @@ class UserProfile extends Equatable {
     String? id,
     String? userId,
     String? displayName,
+    String? companionName,
     int? age,
     String? gender,
+    String? pronouns,
     String? timezone,
     List<String>? wellnessGoals,
     double? sleepHoursTarget,
@@ -48,8 +54,10 @@ class UserProfile extends Equatable {
       id: id ?? this.id,
       userId: userId ?? this.userId,
       displayName: displayName ?? this.displayName,
+      companionName: companionName ?? this.companionName,
       age: age ?? this.age,
       gender: gender ?? this.gender,
+      pronouns: pronouns ?? this.pronouns,
       timezone: timezone ?? this.timezone,
       wellnessGoals: wellnessGoals ?? this.wellnessGoals,
       sleepHoursTarget: sleepHoursTarget ?? this.sleepHoursTarget,
@@ -65,8 +73,10 @@ class UserProfile extends Equatable {
         id,
         userId,
         displayName,
+        companionName,
         age,
         gender,
+        pronouns,
         timezone,
         wellnessGoals,
         sleepHoursTarget,

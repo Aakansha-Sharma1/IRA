@@ -47,7 +47,7 @@ void main() {
     });
 
     test('unknown roles default to user', () {
-      final model = ChatMessageModel.fromJson({
+      final model = ChatMessageModel.fromJson(const {
         'id': 'msg-2',
         'conversation_id': 'conv-123',
         'role': 'unknown',

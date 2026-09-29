@@ -146,15 +146,23 @@ class ConversationService:
         activity = profile.activity_level or "not specified"
         timezone_value = profile.timezone or "UTC"
         display_name = profile.display_name or "friend"
+        companion_name = profile.companion_name or "IRA"
+        pronouns = profile.pronouns or "she/her"
+        age = profile.age if profile.age is not None else "not specified"
+        gender = profile.gender or "not specified"
 
         context = (
             f"{SYSTEM_PROMPT}\n\n"
             "Known companion context provided by the user during onboarding:\n"
-            f"- Preferred name: {display_name}\n"
+            f"- User name: {display_name}\n"
+            f"- User pronouns: {pronouns}\n"
+            f"- User age: {age}\n"
+            f"- User gender: {gender}\n"
+            f"- Companion name: {companion_name}\n"
             f"- Timezone: {timezone_value}\n"
             f"- Wellness focus: {goals}\n"
             f"- Activity preference: {activity}\n"
-            "Use this only as light personalization. Do not invent medical history."
+            "Keep the tone warm, supportive, and conversational while using this information only as light personalization. Do not invent medical history or claim to know anything beyond these preferences."
         )
         return context
 

@@ -16,9 +16,12 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     CORS_ORIGINS: Union[List[str], str] = ["*"]
 
-    AI_PROVIDER: str = "gemini"
-    AI_API_KEY: str = ""
-    AI_MODEL: str = "gemini-2.0-flash"
+    AI_PROVIDER: str = "huggingface"
+    HF_MODEL_ID: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+    HF_TOKEN: str = ""
+    HF_MAX_NEW_TOKENS: int = 256
+    HF_TEMPERATURE: float = 0.7
+    HF_TOP_P: float = 0.9
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod

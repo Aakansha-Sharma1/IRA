@@ -5,8 +5,10 @@ abstract class ProfileRepository {
 
   Future<UserProfile> createProfile({
     required String displayName,
+    String companionName = 'IRA',
     int? age,
     String? gender,
+    String pronouns = 'she/her',
     required String timezone,
     List<String> wellnessGoals = const [],
     double? sleepHoursTarget = 8.0,
@@ -16,8 +18,10 @@ abstract class ProfileRepository {
 
   Future<UserProfile> updateProfile({
     String? displayName,
+    String? companionName,
     int? age,
     String? gender,
+    String? pronouns,
     String? timezone,
     List<String>? wellnessGoals,
     double? sleepHoursTarget,

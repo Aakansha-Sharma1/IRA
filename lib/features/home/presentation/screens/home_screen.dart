@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +14,8 @@ import '../../../../core/widgets/ira_loading_indicator.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../profile/presentation/controllers/profile_controller.dart';
 import '../../../chat/presentation/controllers/conversation_list_controller.dart';
+import '../../../mood/domain/entities/mood_entry.dart';
+import '../../../mood/presentation/controllers/mood_controller.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -27,6 +31,7 @@ class HomeScreen extends ConsumerWidget {
     final conversation = await ref
         .read(conversationListControllerProvider.notifier)
         .createConversation();
+
     if (!context.mounted) return;
     if (conversation == null) {
       final failure = ref.read(conversationListControllerProvider).failure;
@@ -39,7 +44,8 @@ class HomeScreen extends ConsumerWidget {
       );
       return;
     }
-    context.push(AppRoutes.chatPath(conversation.id));
+
+    unawaited(context.push(AppRoutes.chatPath(conversation.id)));
   }
 
   @override
@@ -48,8 +54,11 @@ class HomeScreen extends ConsumerWidget {
     final authState = ref.watch(authControllerProvider);
     final profileState = ref.watch(profileControllerProvider);
     final listState = ref.watch(conversationListControllerProvider);
+    final moodState = ref.watch(moodControllerProvider);
     final profile = profileState.profile;
     final displayName = profile?.displayName;
+    final todayEntry = moodState.todayEntry ??
+        (moodState.entries.isNotEmpty ? moodState.entries.first : null);
 
     if (profileState.isLoading || profileState.isInitial) {
       return const Scaffold(
@@ -65,7 +74,7 @@ class HomeScreen extends ConsumerWidget {
           message: profileState.failure?.message ??
               'Your home screen needs your PostgreSQL profile.',
           onRetry: () {
-            ref.read(profileControllerProvider.notifier).fetchProfile();
+            unawaited(ref.read(profileControllerProvider.notifier).fetchProfile());
           },
         ),
       );
@@ -143,14 +152,65 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppDimensions.space16),
                     IraButton(
-                      text: listState.isCreating
-                          ? 'Starting...'
-                          : 'Talk with IRA',
+                      text: listState.isCreating ? 'Opening...' : 'Chat with IRA',
                       isLoading: listState.isCreating,
                       onPressed: listState.isCreating
                           ? null
-                          : () => _startConversation(context, ref),
+                          : () async {
+                              await _startConversation(context, ref);
+                            },
                       icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppDimensions.space16),
+              IraCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.mood_rounded, color: theme.colorScheme.primary),
+                        const SizedBox(width: AppDimensions.space12),
+                        Expanded(
+                          child: Text(
+                            'Daily check-in',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppDimensions.space12),
+                    if (todayEntry == null)
+                      Text(
+                        'Not completed yet',
+                        style: theme.textTheme.bodyMedium,
+                      )
+                    else
+                      Text(
+                        'Today: ${todayEntry.mood.label} • ${todayEntry.intensity}/5',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    const SizedBox(height: AppDimensions.space12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: IraButton(
+                            text: todayEntry == null ? 'Complete today\'s check-in' : 'Edit today\'s check-in',
+                            onPressed: () => context.push(AppRoutes.dailyCheckIn),
+                          ),
+                        ),
+                        const SizedBox(width: AppDimensions.space8),
+                        Expanded(
+                          child: IraButton(
+                            text: 'Mood history',
+                            onPressed: () => context.push(AppRoutes.moodHistory),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

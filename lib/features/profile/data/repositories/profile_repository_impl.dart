@@ -25,8 +25,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<UserProfile> createProfile({
     required String displayName,
+    String companionName = 'IRA',
     int? age,
     String? gender,
+    String pronouns = 'she/her',
     required String timezone,
     List<String> wellnessGoals = const [],
     double? sleepHoursTarget = 8.0,
@@ -35,8 +37,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }) async {
     final payload = {
       'display_name': displayName,
+      'companion_name': companionName,
       if (age != null) 'age': age,
       if (gender != null && gender.isNotEmpty) 'gender': gender,
+      'pronouns': pronouns,
       'timezone': timezone,
       'wellness_goals': wellnessGoals,
       'sleep_hours_target': sleepHoursTarget,
@@ -50,8 +54,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<UserProfile> updateProfile({
     String? displayName,
+    String? companionName,
     int? age,
     String? gender,
+    String? pronouns,
     String? timezone,
     List<String>? wellnessGoals,
     double? sleepHoursTarget,
@@ -59,8 +65,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }) async {
     final payload = <String, dynamic>{
       if (displayName != null) 'display_name': displayName,
+      if (companionName != null) 'companion_name': companionName,
       if (age != null) 'age': age,
       if (gender != null) 'gender': gender,
+      if (pronouns != null) 'pronouns': pronouns,
       if (timezone != null) 'timezone': timezone,
       if (wellnessGoals != null) 'wellness_goals': wellnessGoals,
       if (sleepHoursTarget != null) 'sleep_hours_target': sleepHoursTarget,

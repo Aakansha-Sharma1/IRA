@@ -51,7 +51,14 @@ class IraButton extends StatelessWidget {
                 icon!,
                 const SizedBox(width: AppDimensions.space8),
               ],
-              Text(text),
+              Flexible(
+                child: Text(
+                  text,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           );
 

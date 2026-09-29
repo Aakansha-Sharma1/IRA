@@ -26,6 +26,11 @@ class Profile(Base):
         String(100),
         nullable=False
     )
+    companion_name: Mapped[str] = mapped_column(
+        String(100),
+        default="IRA",
+        nullable=False
+    )
     age: Mapped[Optional[int]] = mapped_column(
         Integer,
         nullable=True
@@ -33,6 +38,11 @@ class Profile(Base):
     gender: Mapped[Optional[str]] = mapped_column(
         String(50),
         nullable=True
+    )
+    pronouns: Mapped[str] = mapped_column(
+        String(50),
+        default="she/her",
+        nullable=False
     )
     timezone: Mapped[str] = mapped_column(
         String(100),

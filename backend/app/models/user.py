@@ -47,3 +47,8 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    mood_entries: Mapped[list["MoodEntry"]] = relationship(
+        "MoodEntry",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )

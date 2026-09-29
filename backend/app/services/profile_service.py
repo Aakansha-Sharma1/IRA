@@ -29,8 +29,10 @@ class ProfileService:
         profile = await self.profile_repo.create_profile(
             user_id=user_id,
             display_name=req.display_name,
+            companion_name=req.companion_name,
             age=req.age,
             gender=req.gender,
+            pronouns=req.pronouns,
             timezone_str=req.timezone,
             wellness_goals=req.wellness_goals,
             sleep_hours_target=req.sleep_hours_target,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../app/router.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/widgets/ira_error_view.dart';
 import '../../../../core/widgets/ira_loading_indicator.dart';
@@ -20,6 +22,10 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _inputController = TextEditingController();
   final _focusNode = FocusNode();
+
+  void _openVoiceChat() {
+    context.push(AppRoutes.voiceLive);
+  }
 
   @override
   void initState() {
@@ -115,6 +121,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               focusNode: _focusNode,
               enabled: !state.isSending,
               onSend: _send,
+              onOpenVoice: _openVoiceChat,
             ),
           ],
         ),
@@ -190,12 +197,14 @@ class _Composer extends StatelessWidget {
   final FocusNode focusNode;
   final bool enabled;
   final VoidCallback onSend;
+  final VoidCallback onOpenVoice;
 
   const _Composer({
     required this.controller,
     required this.focusNode,
     required this.enabled,
     required this.onSend,
+    required this.onOpenVoice,
   });
 
   @override
@@ -225,6 +234,12 @@ class _Composer extends StatelessWidget {
                 fillColor: theme.colorScheme.surface,
               ),
             ),
+          ),
+          const SizedBox(width: AppDimensions.space8),
+          IconButton.filled(
+            onPressed: enabled ? onOpenVoice : null,
+            icon: const Icon(Icons.mic_rounded),
+            tooltip: 'Open live voice chat',
           ),
           const SizedBox(width: AppDimensions.space8),
           IconButton.filled(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,9 +26,11 @@ class _ConversationHistoryScreenState
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      ref.read(conversationListControllerProvider.notifier).loadConversations();
-    });
+    unawaited(
+      Future.microtask(() {
+        ref.read(conversationListControllerProvider.notifier).loadConversations();
+      }),
+    );
   }
 
   @override
@@ -58,7 +62,7 @@ class _ConversationHistoryScreenState
                   );
                   return;
                 }
-                context.push(AppRoutes.chatPath(conversation.id));
+                unawaited(context.push(AppRoutes.chatPath(conversation.id)));
               },
         icon: const Icon(Icons.add_comment_outlined),
         label: const Text('New chat'),

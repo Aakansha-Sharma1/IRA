@@ -46,8 +46,10 @@ class ProfileController extends StateNotifier<ProfileState> {
 
   Future<bool> createProfile({
     required String displayName,
+    String companionName = 'IRA',
     int? age,
     String? gender,
+    String pronouns = 'she/her',
     required String timezone,
     List<String> wellnessGoals = const [],
     double? sleepHoursTarget = 8.0,
@@ -57,8 +59,10 @@ class ProfileController extends StateNotifier<ProfileState> {
     try {
       final profile = await _repository.createProfile(
         displayName: displayName.trim(),
+        companionName: companionName.trim().isNotEmpty ? companionName.trim() : 'IRA',
         age: age,
         gender: gender?.trim(),
+        pronouns: pronouns.trim().isNotEmpty ? pronouns.trim() : 'she/her',
         timezone: timezone.trim(),
         wellnessGoals: wellnessGoals,
         sleepHoursTarget: sleepHoursTarget,
