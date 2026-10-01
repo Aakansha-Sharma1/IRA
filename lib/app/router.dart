@@ -27,9 +27,8 @@ abstract final class AppRoutes {
   static const String conversations = '/conversations';
   static const String dailyCheckIn = '/daily-checkin';
   static const String moodHistory = '/mood-history';
-  static const String voice = '/voice';
-  static const String voiceLive = '/voice-live';
   static const String chat = '/chat/:conversationId';
+  static const String voiceLive = '/voice-live';
 
   static String chatPath(String conversationId) => '/chat/$conversationId';
 }
@@ -136,22 +135,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const MoodHistoryScreen(),
       ),
       GoRoute(
-        path: AppRoutes.voice,
-        name: 'voice',
-        builder: (context, state) => const VoiceScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.voiceLive,
-        name: 'voice-live',
-        builder: (context, state) => const LiveVoiceChatScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.chat,
         name: 'chat',
         builder: (context, state) {
           final conversationId = state.pathParameters['conversationId'] ?? '';
           return ChatScreen(conversationId: conversationId);
         },
+      ),
+      GoRoute(
+        path: AppRoutes.voiceLive,
+        name: 'voiceLive',
+        builder: (context, state) => const VoiceScreen(),
       ),
     ],
   );

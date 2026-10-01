@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,7 +29,6 @@ class HomeScreen extends ConsumerWidget {
     final conversation = await ref
         .read(conversationListControllerProvider.notifier)
         .createConversation();
-
     if (!context.mounted) return;
     if (conversation == null) {
       final failure = ref.read(conversationListControllerProvider).failure;
@@ -44,8 +41,7 @@ class HomeScreen extends ConsumerWidget {
       );
       return;
     }
-
-    unawaited(context.push(AppRoutes.chatPath(conversation.id)));
+    await context.push(AppRoutes.chatPath(conversation.id));
   }
 
   @override
@@ -74,7 +70,7 @@ class HomeScreen extends ConsumerWidget {
           message: profileState.failure?.message ??
               'Your home screen needs your PostgreSQL profile.',
           onRetry: () {
-            unawaited(ref.read(profileControllerProvider.notifier).fetchProfile());
+            ref.read(profileControllerProvider.notifier).fetchProfile();
           },
         ),
       );
@@ -152,7 +148,9 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppDimensions.space16),
                     IraButton(
-                      text: listState.isCreating ? 'Opening...' : 'Chat with IRA',
+                      text: listState.isCreating
+                          ? 'Starting...'
+                          : 'Talk with IRA',
                       isLoading: listState.isCreating,
                       onPressed: listState.isCreating
                           ? null

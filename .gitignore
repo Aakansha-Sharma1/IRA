@@ -70,6 +70,12 @@ GoogleService-Info.plist
 # Coverage
 coverage/
 
+# Machine-learning and Kaggle dataset artifacts
+backend/ml/data/raw/
+backend/ml/data/processed/
+backend/ml/artifacts/
+backend/ml/**/artifacts/
+
 # Debug screenshots captured during development
 screen*.png
 emulator_screen*.png
