@@ -16,12 +16,15 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     CORS_ORIGINS: Union[List[str], str] = ["*"]
 
-    AI_PROVIDER: str = "huggingface"
-    HF_MODEL_ID: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-    HF_TOKEN: str = ""
-    HF_MAX_NEW_TOKENS: int = 256
-    HF_TEMPERATURE: float = 0.7
-    HF_TOP_P: float = 0.9
+    AI_PROVIDER: str = "groq"
+    AI_API_KEY: str = ""
+    AI_MODEL: str = "qwen/qwen3.8-27b"
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "qwen/qwen3.8-27b"
+
+    IRA_CONTEXT_MESSAGES: int = 12
+    IRA_MAX_RESPONSE_TOKENS: int = 350
+    IRA_TEMPERATURE: float = 0.7
 
     LIVEKIT_URL: str = ""
     LIVEKIT_API_KEY: str = ""

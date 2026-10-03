@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../app/router.dart';
 import '../../../../core/constants/app_dimensions.dart';
@@ -9,6 +12,7 @@ import '../../../../core/widgets/ira_loading_indicator.dart';
 import '../../domain/entities/chat_message.dart';
 import '../controllers/chat_controller.dart';
 import '../controllers/chat_state.dart';
+import '../controllers/conversation_list_controller.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String conversationId;
@@ -27,11 +31,167 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     context.push(AppRoutes.voiceLive);
   }
 
+  Future<void> _openConversationHistory() async {
+    unawaited(
+      ref.read(conversationListControllerProvider.notifier).loadConversations(),
+    );
+
+    if (!mounted) return;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) {
+        return Consumer(
+          builder: (context, ref, child) {
+            final listState = ref.watch(conversationListControllerProvider);
+            final conversations = listState.conversations;
+
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppDimensions.space16,
+                AppDimensions.space8,
+                AppDimensions.space16,
+                AppDimensions.space16,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Recent conversations',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                        icon: const Icon(Icons.close_rounded),
+                        tooltip: 'Close history',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppDimensions.space8),
+                  if (listState.isLoading && conversations.isEmpty)
+                    const SizedBox(
+                      height: 120,
+                      child: Center(child: IraLoadingIndicator(message: 'Loading history...')),
+                    )
+                  else if (listState.isError && conversations.isEmpty)
+                    Text(
+                      listState.failure?.message ?? 'Unable to load conversation history.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    )
+                  else if (conversations.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: AppDimensions.space20),
+                      child: Text(
+                        'No saved chats yet. Start a new one to build your history.',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    )
+                  else
+                    Flexible(
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: conversations.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: AppDimensions.space8),
+                        itemBuilder: (context, index) {
+                          final conversation = conversations[index];
+                          final isActive = conversation.id == widget.conversationId;
+
+                          return Material(
+                            color: isActive
+                                ? Theme.of(context).colorScheme.primaryContainer
+                                : Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(16),
+                            child: ListTile(
+                              leading: Icon(
+                                isActive
+                                    ? Icons.chat_bubble_rounded
+                                    : Icons.chat_bubble_outline_rounded,
+                                color: isActive
+                                    ? Theme.of(context).colorScheme.primary
+                                    : null,
+                              ),
+                              title: Text(
+                                conversation.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                              subtitle: Text(
+                                DateFormat.yMMMd().add_jm().format(
+                                  conversation.updatedAt.toLocal(),
+                                ),
+                              ),
+                              trailing: isActive ? const Icon(Icons.check_rounded) : null,
+                              onTap: () async {
+                                Navigator.of(sheetContext).pop();
+                                if (conversation.id == widget.conversationId) return;
+                                if (!context.mounted) return;
+                                context.pushReplacement(AppRoutes.chatPath(conversation.id));
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  const SizedBox(height: AppDimensions.space12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: () async {
+                        final conversation = await ref
+                            .read(conversationListControllerProvider.notifier)
+                            .createConversation();
+                        if (!context.mounted) return;
+                        if (conversation == null) {
+                          final failure = ref.read(conversationListControllerProvider).failure;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                failure?.message ?? 'Unable to start a new conversation.',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+                        if (Navigator.of(sheetContext).canPop()) {
+                          Navigator.of(sheetContext).pop();
+                        }
+                        if (!context.mounted) return;
+                        context.pushReplacement(AppRoutes.chatPath(conversation.id));
+                      },
+                      icon: const Icon(Icons.add_comment_outlined),
+                      label: const Text('New chat'),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
       ref.read(chatControllerProvider(widget.conversationId).notifier).loadMessages();
+      ref.read(conversationListControllerProvider.notifier).loadConversations();
     });
   }
 
@@ -61,6 +221,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('IRA Companion'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history_rounded),
+            tooltip: 'Conversation history',
+            onPressed: _openConversationHistory,
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(

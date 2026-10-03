@@ -1,6 +1,12 @@
+import re
+from typing import Sequence
+
 from fastapi import HTTPException, status
 
-from app.repositories.conversation_repository import ConversationRepository, MAX_CONTEXT_MESSAGES
+from app.agents.prompts import IRA_SYSTEM_PROMPT, build_ira_system_prompt
+from app.core.config import settings
+from app.repositories.conversation_repository import ConversationRepository
+from app.repositories.mood_repository import MoodRepository
 from app.repositories.profile_repository import ProfileRepository
 from app.schemas.conversation import (
     ConversationCreate,
@@ -10,16 +16,11 @@ from app.schemas.conversation import (
     SendMessageResponse,
 )
 from app.services.ai_service import AIService, AIServiceError, ChatTurn
+from app.services.wellness_context_service import WellnessContextService
 
 DEFAULT_TITLE = "New conversation"
 
-SYSTEM_PROMPT = (
-    "You are IRA, a preventive wellness companion. "
-    "Offer supportive, practical, non-clinical conversation about everyday wellbeing. "
-    "Do not diagnose diseases, prescribe medication, or claim to be a medical professional. "
-    "If the user describes a medical emergency, encourage them to seek appropriate professional help. "
-    "Keep replies concise, warm, and grounded in what the user shares."
-)
+SYSTEM_PROMPT = IRA_SYSTEM_PROMPT
 
 
 class ConversationService:
@@ -28,10 +29,15 @@ class ConversationService:
         conversation_repo: ConversationRepository,
         profile_repo: ProfileRepository,
         ai_service: AIService,
+        mood_repo: MoodRepository | None = None,
     ):
         self.conversation_repo = conversation_repo
         self.profile_repo = profile_repo
         self.ai_service = ai_service
+        self.mood_repo = mood_repo
+        self.wellness_context_service = (
+            WellnessContextService(mood_repo, profile_repo) if mood_repo is not None else None
+        )
 
     async def create_conversation(self, user_id: str, req: ConversationCreate) -> ConversationSummary:
         title = (req.title or "").strip() or DEFAULT_TITLE
@@ -85,7 +91,7 @@ class ConversationService:
         trimmed = content.strip()
         if not trimmed:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Message content cannot be empty.",
             )
 
@@ -94,12 +100,12 @@ class ConversationService:
         )
 
         if conversation.title == DEFAULT_TITLE:
-            await self.conversation_repo.update_title(
-                conversation, _title_from_content(trimmed)
-            )
+            generated_title = _title_from_content(trimmed)
+            if generated_title != DEFAULT_TITLE:
+                await self.conversation_repo.update_title(conversation, generated_title)
 
         history_rows = await self.conversation_repo.list_recent_messages(
-            conversation.id, limit=MAX_CONTEXT_MESSAGES
+            conversation.id, limit=settings.IRA_CONTEXT_MESSAGES
         )
         history = [
             ChatTurn(role=row.role, content=row.content)
@@ -137,40 +143,24 @@ class ConversationService:
             assistant_message=MessageResponse.model_validate(assistant_message),
         )
 
-    async def _build_system_prompt(self, user_id: str) -> str:
+    async def _build_system_prompt(self, user_id: str, wellness_context: str | None = None) -> str:
         profile = await self.profile_repo.get_by_user_id(user_id)
-        if not profile:
-            return SYSTEM_PROMPT
-
-        goals = ", ".join(profile.wellness_goals) if profile.wellness_goals else "not specified"
-        activity = profile.activity_level or "not specified"
-        timezone_value = profile.timezone or "UTC"
-        display_name = profile.display_name or "friend"
-        companion_name = profile.companion_name or "IRA"
-        pronouns = profile.pronouns or "she/her"
-        age = profile.age if profile.age is not None else "not specified"
-        gender = profile.gender or "not specified"
-
-        context = (
-            f"{SYSTEM_PROMPT}\n\n"
-            "Known companion context provided by the user during onboarding:\n"
-            f"- User name: {display_name}\n"
-            f"- User pronouns: {pronouns}\n"
-            f"- User age: {age}\n"
-            f"- User gender: {gender}\n"
-            f"- Companion name: {companion_name}\n"
-            f"- Timezone: {timezone_value}\n"
-            f"- Wellness focus: {goals}\n"
-            f"- Activity preference: {activity}\n"
-            "Keep the tone warm, supportive, and conversational while using this information only as light personalization. Do not invent medical history or claim to know anything beyond these preferences."
+        resolved_context = wellness_context
+        if resolved_context is None and self.wellness_context_service is not None:
+            resolved_context = await self.wellness_context_service.build_for_user(user_id)
+        return build_ira_system_prompt(
+            profile=profile,
+            wellness_context=resolved_context,
+            limit=settings.IRA_CONTEXT_MESSAGES,
         )
-        return context
 
 
 def _title_from_content(content: str) -> str:
-    cleaned = " ".join(content.split())
+    cleaned = " ".join(content.split()).strip()
     if not cleaned:
         return DEFAULT_TITLE
-    if len(cleaned) <= 48:
+
+    if len(cleaned) <= 50:
         return cleaned
-    return cleaned[:45].rstrip() + "..."
+
+    return cleaned[:50].rstrip()
