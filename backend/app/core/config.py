@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     HF_TEMPERATURE: float = 0.7
     HF_TOP_P: float = 0.9
 
+    LIVEKIT_URL: str = ""
+    LIVEKIT_API_KEY: str = ""
+    LIVEKIT_API_SECRET: str = ""
+
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
