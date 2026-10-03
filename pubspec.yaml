@@ -32,6 +32,9 @@ dependencies:
   # Formatting & Internationalization
   intl: ^0.19.0
 
+  # LiveKit real-time audio/video
+  livekit_client: ^2.5.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

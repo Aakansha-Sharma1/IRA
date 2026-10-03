@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     IRA_MAX_RESPONSE_TOKENS: int = 350
     IRA_TEMPERATURE: float = 0.7
 
+    LIVEKIT_URL: str = ""
+    LIVEKIT_API_KEY: str = ""
+    LIVEKIT_API_SECRET: str = ""
+
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
