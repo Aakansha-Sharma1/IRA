@@ -4,10 +4,26 @@ import '../entities/conversation.dart';
 class SendMessageResult {
   final ChatMessage userMessage;
   final ChatMessage assistantMessage;
+  final bool crisisDetected;
+  final CrisisAction? crisisAction;
 
   const SendMessageResult({
     required this.userMessage,
     required this.assistantMessage,
+    this.crisisDetected = false,
+    this.crisisAction,
+  });
+}
+
+class CrisisAction {
+  final String type;
+  final String label;
+  final String phone;
+
+  const CrisisAction({
+    required this.type,
+    required this.label,
+    required this.phone,
   });
 }
 

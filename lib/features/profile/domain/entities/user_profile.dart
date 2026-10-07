@@ -6,6 +6,8 @@ class UserProfile extends Equatable {
   final String userId;
   final String displayName;
   final String companionName;
+  final String? representativeName;
+  final String? representativeGender;
   final int? age;
   final String? gender;
   final String pronouns;
@@ -22,6 +24,8 @@ class UserProfile extends Equatable {
     required this.userId,
     required this.displayName,
     this.companionName = 'IRA',
+    this.representativeName,
+    this.representativeGender,
     this.age,
     this.gender,
     this.pronouns = 'she/her',
@@ -39,6 +43,8 @@ class UserProfile extends Equatable {
     String? userId,
     String? displayName,
     String? companionName,
+    String? representativeName,
+    String? representativeGender,
     int? age,
     String? gender,
     String? pronouns,
@@ -55,6 +61,8 @@ class UserProfile extends Equatable {
       userId: userId ?? this.userId,
       displayName: displayName ?? this.displayName,
       companionName: companionName ?? this.companionName,
+      representativeName: representativeName ?? this.representativeName,
+      representativeGender: representativeGender ?? this.representativeGender,
       age: age ?? this.age,
       gender: gender ?? this.gender,
       pronouns: pronouns ?? this.pronouns,
@@ -74,6 +82,8 @@ class UserProfile extends Equatable {
         userId,
         displayName,
         companionName,
+        representativeName,
+        representativeGender,
         age,
         gender,
         pronouns,

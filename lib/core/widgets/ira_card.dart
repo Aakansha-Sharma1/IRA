@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme/app_gradients.dart';
 import '../constants/app_dimensions.dart';
 
 /// Standard card with customizable elevation, padding, and tap handler
@@ -31,10 +32,25 @@ class IraCard extends StatelessWidget {
           ),
     );
 
-    return Card(
-      color: backgroundColor ?? theme.cardTheme.color,
-      elevation: theme.cardTheme.elevation,
-      shape: cardShape,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: backgroundColor == null ? null : AppGradients.blueViolet,
+        color: backgroundColor ??
+            theme.colorScheme.surface.withValues(
+              alpha: theme.brightness == Brightness.dark ? 0.72 : 0.82,
+            ),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+        border: Border.fromBorderSide(cardShape.side),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: theme.brightness == Brightness.dark ? 0.16 : 0.06,
+            ),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),

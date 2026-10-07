@@ -16,11 +16,13 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     CORS_ORIGINS: Union[List[str], str] = ["*"]
 
-    AI_PROVIDER: str = "groq"
+    AI_PROVIDER: str = "sarvam"
     AI_API_KEY: str = ""
-    AI_MODEL: str = "qwen/qwen3.8-27b"
-    GROQ_API_KEY: str = ""
-    GROQ_MODEL: str = "qwen/qwen3.8-27b"
+    AI_MODEL: str = "sarvam-105b-conversations"
+    SARVAM_API_KEY: str = ""
+    SARVAM_MODEL: str = "sarvam-105b-conversations"
+    SARVAM_MAX_TOKENS: int = 256
+    MANAS_HELPLINE_PHONE: str = ""
 
     IRA_CONTEXT_MESSAGES: int = 12
     IRA_MAX_RESPONSE_TOKENS: int = 350

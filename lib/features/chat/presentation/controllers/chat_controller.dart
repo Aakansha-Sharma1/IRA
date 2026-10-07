@@ -55,11 +55,15 @@ class ChatController extends StateNotifier<ChatState> {
         conversationId: conversationId,
         content: trimmed,
       );
-      state = ChatState.sent([
-        ...state.messages,
-        result.userMessage,
-        result.assistantMessage,
-      ]);
+      state = ChatState.sent(
+        [
+          ...state.messages,
+          result.userMessage,
+          result.assistantMessage,
+        ],
+        crisisDetected: result.crisisDetected,
+        crisisAction: result.crisisAction,
+      );
       _onConversationUpdated?.call();
       return true;
     } on AppException catch (e) {

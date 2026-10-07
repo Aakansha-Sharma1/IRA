@@ -21,6 +21,8 @@ class ProfileRepository:
         user_id: str,
         display_name: str,
         companion_name: str = "IRA",
+        representative_name: Optional[str] = None,
+        representative_gender: Optional[str] = None,
         age: Optional[int] = None,
         gender: Optional[str] = None,
         pronouns: str = "she/her",
@@ -36,6 +38,10 @@ class ProfileRepository:
             user_id=user_id,
             display_name=display_name.strip(),
             companion_name=(companion_name or "IRA").strip() or "IRA",
+            representative_name=(
+                representative_name.strip() if representative_name else None
+            ),
+            representative_gender=representative_gender,
             age=age,
             gender=gender.strip() if gender else None,
             pronouns=(pronouns or "she/her").strip() or "she/her",

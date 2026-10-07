@@ -20,10 +20,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _displayNameController;
+  late TextEditingController _representativeNameController;
   late TextEditingController _ageController;
   String _selectedGender = 'Prefer not to say';
   double _sleepHoursTarget = 8.0;
   String _activityLevel = 'Moderate';
+  String? _representativeGender;
 
   @override
   void initState() {
@@ -31,20 +33,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profile = ref.read(profileControllerProvider).profile;
     _displayNameController =
         TextEditingController(text: profile?.displayName ?? '');
+    _representativeNameController =
+        TextEditingController(text: profile?.representativeName ?? '');
+    _representativeGender = profile?.representativeGender;
     _ageController =
         TextEditingController(text: profile?.age?.toString() ?? '');
     _selectedGender = profile?.gender ?? 'Prefer not to say';
     _sleepHoursTarget = profile?.sleepHoursTarget ?? 8.0;
-    _activityLevel = (profile?.activityLevel != null &&
-            profile!.activityLevel!.isNotEmpty)
-        ? profile.activityLevel![0].toUpperCase() +
-            profile.activityLevel!.substring(1)
-        : 'Moderate';
+    _activityLevel =
+        (profile?.activityLevel != null && profile!.activityLevel!.isNotEmpty)
+            ? profile.activityLevel![0].toUpperCase() +
+                profile.activityLevel!.substring(1)
+            : 'Moderate';
   }
 
   @override
   void dispose() {
     _displayNameController.dispose();
+    _representativeNameController.dispose();
     _ageController.dispose();
     super.dispose();
   }
@@ -53,14 +59,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profile = ref.read(profileControllerProvider).profile;
     if (profile != null) {
       _displayNameController.text = profile.displayName;
+      _representativeNameController.text = profile.representativeName ?? '';
+      _representativeGender = profile.representativeGender;
       _ageController.text = profile.age?.toString() ?? '';
       _selectedGender = profile.gender ?? 'Prefer not to say';
       _sleepHoursTarget = profile.sleepHoursTarget ?? 8.0;
-      _activityLevel = (profile.activityLevel != null &&
-              profile.activityLevel!.isNotEmpty)
-          ? profile.activityLevel![0].toUpperCase() +
-              profile.activityLevel!.substring(1)
-          : 'Moderate';
+      _activityLevel =
+          (profile.activityLevel != null && profile.activityLevel!.isNotEmpty)
+              ? profile.activityLevel![0].toUpperCase() +
+                  profile.activityLevel!.substring(1)
+              : 'Moderate';
     }
   }
 
@@ -71,6 +79,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final success =
         await ref.read(profileControllerProvider.notifier).updateProfile(
               displayName: _displayNameController.text.trim(),
+              representativeName: _representativeNameController.text.trim(),
+              representativeGender: _representativeGender,
               age: age,
               gender: _selectedGender == 'Prefer not to say'
                   ? null
@@ -181,7 +191,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppDimensions.space24),
-
               if (_isEditing)
                 Form(
                   key: _formKey,
@@ -204,6 +213,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             return 'Display name cannot be empty';
                           }
                           return null;
+                        },
+                      ),
+                      const SizedBox(height: AppDimensions.space16),
+                      IraTextField(
+                        controller: _representativeNameController,
+                        label: 'IRA Representative Name',
+                        prefixIcon: const Icon(Icons.auto_awesome_rounded),
+                      ),
+                      const SizedBox(height: AppDimensions.space12),
+                      Text(
+                        'Representative gender',
+                        style: theme.textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: AppDimensions.space8),
+                      SegmentedButton<String>(
+                        segments: const [
+                          ButtonSegment(value: 'female', label: Text('Female')),
+                          ButtonSegment(value: 'male', label: Text('Male')),
+                          ButtonSegment(
+                            value: 'non_binary',
+                            label: Text('Non-binary'),
+                          ),
+                        ],
+                        selected: _representativeGender == null
+                            ? <String>{}
+                            : <String>{_representativeGender!},
+                        emptySelectionAllowed: true,
+                        onSelectionChanged: (selection) {
+                          setState(() {
+                            _representativeGender =
+                                selection.isEmpty ? null : selection.first;
+                          });
                         },
                       ),
                       const SizedBox(height: AppDimensions.space16),
@@ -267,13 +308,29 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     IraCard(
                       child: Column(
                         children: [
-                          _buildProfileRow('Display Name', profile?.displayName ?? '—'),
+                          _buildProfileRow(
+                              'Display Name', profile?.displayName ?? '—'),
                           const Divider(),
-                          _buildProfileRow('Age', profile?.age?.toString() ?? 'Not specified'),
+                          _buildProfileRow(
+                            'IRA Representative',
+                            profile?.representativeName ?? 'Not configured',
+                          ),
                           const Divider(),
-                          _buildProfileRow('Gender', profile?.gender ?? 'Not specified'),
+                          _buildProfileRow(
+                            'Representative Gender',
+                            _prettyRepresentativeGender(
+                              profile?.representativeGender,
+                            ),
+                          ),
                           const Divider(),
-                          _buildProfileRow('Timezone', profile?.timezone ?? 'UTC'),
+                          _buildProfileRow('Age',
+                              profile?.age?.toString() ?? 'Not specified'),
+                          const Divider(),
+                          _buildProfileRow(
+                              'Gender', profile?.gender ?? 'Not specified'),
+                          const Divider(),
+                          _buildProfileRow(
+                              'Timezone', profile?.timezone ?? 'UTC'),
                           const Divider(),
                           _buildProfileRow(
                             'Target Sleep',
@@ -354,5 +411,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  String _prettyRepresentativeGender(String? value) {
+    if (value == null || value.isEmpty) return 'Not configured';
+    return value
+        .split('_')
+        .map((part) => part[0].toUpperCase() + part.substring(1))
+        .join(' ');
   }
 }

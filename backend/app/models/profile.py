@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import uuid
 from typing import List, Optional
-from sqlalchemy import String, Integer, Float, Boolean, DateTime, ForeignKey, JSON
+from sqlalchemy import CheckConstraint, String, Integer, Float, Boolean, DateTime, ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -9,6 +9,13 @@ from app.models.base import Base
 
 class Profile(Base):
     __tablename__ = "profiles"
+    __table_args__ = (
+        CheckConstraint(
+            "representative_gender IS NULL OR representative_gender IN "
+            "('male', 'female', 'non_binary')",
+            name="ck_profiles_representative_gender",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(
         String(36),
@@ -30,6 +37,14 @@ class Profile(Base):
         String(100),
         default="IRA",
         nullable=False
+    )
+    representative_name: Mapped[Optional[str]] = mapped_column(
+        String(100),
+        nullable=True,
+    )
+    representative_gender: Mapped[Optional[str]] = mapped_column(
+        String(20),
+        nullable=True,
     )
     age: Mapped[Optional[int]] = mapped_column(
         Integer,

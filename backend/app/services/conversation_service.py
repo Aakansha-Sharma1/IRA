@@ -3,7 +3,11 @@ from typing import Sequence
 
 from fastapi import HTTPException, status
 
-from app.agents.prompts import IRA_SYSTEM_PROMPT, build_ira_system_prompt
+from app.agents.prompts import (
+    IRA_SYSTEM_PROMPT,
+    build_ira_system_prompt,
+    is_crisis_message,
+)
 from app.core.config import settings
 from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.mood_repository import MoodRepository
@@ -113,7 +117,8 @@ class ConversationService:
             if row.role in ("user", "assistant")
         ]
 
-        system_prompt = await self._build_system_prompt(user_id)
+        system_prompt = await self._build_system_prompt(user_id, user_message=trimmed)
+        crisis_detected = is_crisis_message(trimmed)
 
         try:
             assistant_text = await self.ai_service.generate_reply(
@@ -141,9 +146,24 @@ class ConversationService:
         return SendMessageResponse(
             user_message=MessageResponse.model_validate(user_message),
             assistant_message=MessageResponse.model_validate(assistant_message),
+            crisis_detected=crisis_detected,
+            crisis_action=(
+                {
+                    "type": "phone",
+                    "label": "Call Manas",
+                    "phone": settings.MANAS_HELPLINE_PHONE,
+                }
+                if crisis_detected
+                else None
+            ),
         )
 
-    async def _build_system_prompt(self, user_id: str, wellness_context: str | None = None) -> str:
+    async def _build_system_prompt(
+        self,
+        user_id: str,
+        wellness_context: str | None = None,
+        user_message: str | None = None,
+    ) -> str:
         profile = await self.profile_repo.get_by_user_id(user_id)
         resolved_context = wellness_context
         if resolved_context is None and self.wellness_context_service is not None:
@@ -152,6 +172,7 @@ class ConversationService:
             profile=profile,
             wellness_context=resolved_context,
             limit=settings.IRA_CONTEXT_MESSAGES,
+            user_message=user_message,
         )
 
 

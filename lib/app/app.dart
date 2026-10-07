@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import 'router.dart';
 import 'theme/app_theme.dart';
+import '../core/widgets/ira_gradient_background.dart';
 
 /// Root application widget for IRA AI
 class IraApp extends ConsumerWidget {
@@ -20,6 +21,9 @@ class IraApp extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: router,
+      builder: (context, child) => IraGradientBackground(
+        child: child ?? const SizedBox.shrink(),
+      ),
     );
   }
 }

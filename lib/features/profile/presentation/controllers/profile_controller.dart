@@ -47,6 +47,8 @@ class ProfileController extends StateNotifier<ProfileState> {
   Future<bool> createProfile({
     required String displayName,
     String companionName = 'IRA',
+    String? representativeName,
+    String? representativeGender,
     int? age,
     String? gender,
     String pronouns = 'she/her',
@@ -60,6 +62,8 @@ class ProfileController extends StateNotifier<ProfileState> {
       final profile = await _repository.createProfile(
         displayName: displayName.trim(),
         companionName: companionName.trim().isNotEmpty ? companionName.trim() : 'IRA',
+        representativeName: representativeName?.trim(),
+        representativeGender: representativeGender,
         age: age,
         gender: gender?.trim(),
         pronouns: pronouns.trim().isNotEmpty ? pronouns.trim() : 'she/her',
@@ -90,6 +94,8 @@ class ProfileController extends StateNotifier<ProfileState> {
 
   Future<bool> updateProfile({
     String? displayName,
+    String? representativeName,
+    String? representativeGender,
     int? age,
     String? gender,
     String? timezone,
@@ -101,6 +107,8 @@ class ProfileController extends StateNotifier<ProfileState> {
     try {
       final updated = await _repository.updateProfile(
         displayName: displayName?.trim(),
+        representativeName: representativeName?.trim(),
+        representativeGender: representativeGender,
         age: age,
         gender: gender?.trim(),
         timezone: timezone?.trim(),

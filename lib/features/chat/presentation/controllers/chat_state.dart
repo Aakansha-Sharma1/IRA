@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../../core/errors/failure.dart';
 import '../../domain/entities/chat_message.dart';
+import '../../domain/repositories/conversation_repository.dart';
 
 enum ChatStatus {
   initial,
@@ -17,12 +18,16 @@ class ChatState extends Equatable {
   final List<ChatMessage> messages;
   final Failure? failure;
   final String? lastFailedContent;
+  final bool crisisDetected;
+  final CrisisAction? crisisAction;
 
   const ChatState({
     this.status = ChatStatus.initial,
     this.messages = const [],
     this.failure,
     this.lastFailedContent,
+    this.crisisDetected = false,
+    this.crisisAction,
   });
 
   const ChatState.initial() : this(status: ChatStatus.initial);
@@ -36,8 +41,16 @@ class ChatState extends Equatable {
   const ChatState.sending(List<ChatMessage> messages)
       : this(status: ChatStatus.sending, messages: messages);
 
-  const ChatState.sent(List<ChatMessage> messages)
-      : this(status: ChatStatus.sent, messages: messages);
+  const ChatState.sent(
+    List<ChatMessage> messages, {
+    bool crisisDetected = false,
+    CrisisAction? crisisAction,
+  }) : this(
+          status: ChatStatus.sent,
+          messages: messages,
+          crisisDetected: crisisDetected,
+          crisisAction: crisisAction,
+        );
 
   const ChatState.error(
     Failure failure, {
@@ -59,5 +72,12 @@ class ChatState extends Equatable {
   bool get isEmpty => isMessagesLoaded && messages.isEmpty && !isSending;
 
   @override
-  List<Object?> get props => [status, messages, failure, lastFailedContent];
+  List<Object?> get props => [
+        status,
+        messages,
+        failure,
+        lastFailedContent,
+        crisisDetected,
+        crisisAction,
+      ];
 }

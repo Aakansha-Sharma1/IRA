@@ -11,9 +11,90 @@ class MockAuthRepository extends Mock implements AuthRepository {}
 void main() {
   test('chat route helper uses backend conversation id', () {
     expect(AppRoutes.conversations, '/conversations');
+    expect(AppRoutes.chatLanding, '/chat');
     expect(AppRoutes.chat, '/chat/:conversationId');
     expect(AppRoutes.chatPath('abc-123'), '/chat/abc-123');
     expect(AppRoutes.home, '/home');
+  });
+
+  test('unauthenticated users are sent to login except auth routes', () {
+    expect(
+      authRedirect(
+        authResolved: true,
+        isAuthenticated: false,
+        currentLocation: AppRoutes.chatLanding,
+      ),
+      AppRoutes.login,
+    );
+    expect(
+      authRedirect(
+        authResolved: true,
+        isAuthenticated: false,
+        currentLocation: AppRoutes.login,
+      ),
+      isNull,
+    );
+    expect(
+      authRedirect(
+        authResolved: true,
+        isAuthenticated: false,
+        currentLocation: AppRoutes.register,
+      ),
+      isNull,
+    );
+  });
+
+  test('authenticated entry routes are sent to chat while home remains accessible', () {
+    for (final route in [
+      AppRoutes.splash,
+      AppRoutes.login,
+      AppRoutes.register,
+      AppRoutes.onboarding,
+    ]) {
+      expect(
+        authRedirect(
+          authResolved: true,
+          isAuthenticated: true,
+          currentLocation: route,
+        ),
+        AppRoutes.chatLanding,
+      );
+    }
+    expect(
+      authRedirect(
+        authResolved: true,
+        isAuthenticated: true,
+        currentLocation: AppRoutes.home,
+      ),
+      isNull,
+    );
+    expect(
+      authRedirect(
+        authResolved: true,
+        isAuthenticated: true,
+        currentLocation: AppRoutes.chatPath('real-conversation'),
+      ),
+      isNull,
+    );
+  });
+
+  test('session restoration waits on splash until auth is resolved', () {
+    expect(
+      authRedirect(
+        authResolved: false,
+        isAuthenticated: false,
+        currentLocation: AppRoutes.splash,
+      ),
+      isNull,
+    );
+    expect(
+      authRedirect(
+        authResolved: false,
+        isAuthenticated: false,
+        currentLocation: AppRoutes.login,
+      ),
+      AppRoutes.splash,
+    );
   });
 
   test('logout callback clears protected state hooks', () async {

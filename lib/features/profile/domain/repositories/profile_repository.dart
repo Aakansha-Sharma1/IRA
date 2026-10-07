@@ -6,6 +6,8 @@ abstract class ProfileRepository {
   Future<UserProfile> createProfile({
     required String displayName,
     String companionName = 'IRA',
+    String? representativeName,
+    String? representativeGender,
     int? age,
     String? gender,
     String pronouns = 'she/her',
@@ -19,6 +21,8 @@ abstract class ProfileRepository {
   Future<UserProfile> updateProfile({
     String? displayName,
     String? companionName,
+    String? representativeName,
+    String? representativeGender,
     int? age,
     String? gender,
     String? pronouns,

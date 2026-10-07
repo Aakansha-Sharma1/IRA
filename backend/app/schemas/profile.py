@@ -1,11 +1,16 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
+
+
+RepresentativeGender = Literal["male", "female", "non_binary"]
 
 
 class ProfileCreate(BaseModel):
     display_name: str = Field(..., min_length=1, max_length=100, description="User's preferred name or pseudonym")
     companion_name: str = Field("IRA", min_length=1, max_length=100, description="The name of the user's AI companion")
+    representative_name: Optional[str] = Field(None, min_length=1, max_length=100)
+    representative_gender: Optional[RepresentativeGender] = None
     age: Optional[int] = Field(None, ge=13, le=120, description="Age between 13 and 120")
     gender: Optional[str] = Field(None, max_length=50)
     pronouns: str = Field("she/her", min_length=1, max_length=50, description="The user's pronouns")
@@ -19,6 +24,8 @@ class ProfileCreate(BaseModel):
 class ProfileUpdate(BaseModel):
     display_name: Optional[str] = Field(None, min_length=1, max_length=100)
     companion_name: Optional[str] = Field(None, min_length=1, max_length=100)
+    representative_name: Optional[str] = Field(None, min_length=1, max_length=100)
+    representative_gender: Optional[RepresentativeGender] = None
     age: Optional[int] = Field(None, ge=13, le=120)
     gender: Optional[str] = Field(None, max_length=50)
     pronouns: Optional[str] = Field(None, min_length=1, max_length=50)
@@ -34,6 +41,8 @@ class ProfileResponse(BaseModel):
     user_id: str
     display_name: str
     companion_name: str
+    representative_name: Optional[str] = None
+    representative_gender: Optional[RepresentativeGender] = None
     age: Optional[int] = None
     gender: Optional[str] = None
     pronouns: str

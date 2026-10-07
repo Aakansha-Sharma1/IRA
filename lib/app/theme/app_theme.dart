@@ -12,7 +12,7 @@ abstract final class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       primaryColor: AppColors.primary,
-      scaffoldBackgroundColor: AppColors.backgroundLight,
+      scaffoldBackgroundColor: Colors.transparent,
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         onPrimary: Colors.white,
@@ -32,7 +32,7 @@ abstract final class AppTheme {
       ),
       textTheme: AppTypography.lightTextTheme,
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.backgroundLight,
+        backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -56,7 +56,8 @@ abstract final class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          minimumSize: const Size(double.infinity, AppDimensions.buttonHeightMd),
+          minimumSize:
+              const Size(double.infinity, AppDimensions.buttonHeightMd),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           ),
@@ -67,7 +68,8 @@ abstract final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
-          minimumSize: const Size(double.infinity, AppDimensions.buttonHeightMd),
+          minimumSize:
+              const Size(double.infinity, AppDimensions.buttonHeightMd),
           side: const BorderSide(color: AppColors.primary, width: 1.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
@@ -77,7 +79,7 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceLight,
+        fillColor: const Color(0xD9FFFFFF),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.space16,
           vertical: AppDimensions.space16,
@@ -120,7 +122,7 @@ abstract final class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       primaryColor: AppColors.primaryLight,
-      scaffoldBackgroundColor: AppColors.backgroundDark,
+      scaffoldBackgroundColor: Colors.transparent,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primaryLight,
         onPrimary: AppColors.neutral950,
@@ -140,7 +142,7 @@ abstract final class AppTheme {
       ),
       textTheme: AppTypography.darkTextTheme,
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.backgroundDark,
+        backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -164,7 +166,8 @@ abstract final class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryLight,
           foregroundColor: AppColors.neutral950,
-          minimumSize: const Size(double.infinity, AppDimensions.buttonHeightMd),
+          minimumSize:
+              const Size(double.infinity, AppDimensions.buttonHeightMd),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           ),
@@ -175,7 +178,8 @@ abstract final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primaryLight,
-          minimumSize: const Size(double.infinity, AppDimensions.buttonHeightMd),
+          minimumSize:
+              const Size(double.infinity, AppDimensions.buttonHeightMd),
           side: const BorderSide(color: AppColors.primaryLight, width: 1.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
@@ -185,7 +189,7 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceDark,
+        fillColor: const Color(0xB819162D),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.space16,
           vertical: AppDimensions.space16,
