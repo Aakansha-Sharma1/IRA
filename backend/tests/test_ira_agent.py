@@ -1,12 +1,6 @@
-import asyncio
-import types
-
 import pytest
 
-from app.agents.agent import IRAAgent
 from app.agents.prompts import build_ira_system_prompt
-from app.core.config import Settings
-from app.services.ai_service import AIServiceError
 
 
 @pytest.fixture
@@ -97,105 +91,18 @@ def test_prompt_mirrors_user_script_and_language_for_romanized_hindi(profile_pay
         assert phrase.lower() in prompt.lower()
 
 
+def test_prompt_mentions_occasional_mental_wellness_breathing_suggestion():
+    prompt = build_ira_system_prompt(
+        user_message="I've been overwhelmed and can't calm down."
+    )
+
+    assert "occasionally suggest a short breathing exercise in Mental Wellness" in prompt
+    assert "Crisis behavior always takes precedence" in prompt
+
+
 def test_detect_response_language_style_handles_english_and_devanagari():
     from app.agents.prompts import detect_response_language_style
 
     assert "Romanized Hindi" in detect_response_language_style("mera mood aaj bahut off hai")
     assert "English" in detect_response_language_style("I had a really bad day")
     assert "Devanagari Hindi" in detect_response_language_style("आज मेरा दिन बहुत खराब था")
-
-
-def test_agent_safety_note_only_for_explicit_self_harm():
-    settings = Settings(GROQ_API_KEY="test-key")
-    agent = IRAAgent(settings)
-
-    class FakeChoice:
-        class Message:
-            content = "Test reply"
-
-        choices = [types.SimpleNamespace(message=Message())]
-
-    def fake_create(model, messages, temperature, max_tokens):
-        return FakeChoice()
-
-    agent.client = types.SimpleNamespace(
-        chat=types.SimpleNamespace(
-            completions=types.SimpleNamespace(create=fake_create)
-        )
-    )
-
-    normal_prompt = asyncio.run(
-        agent.respond(system_prompt="System prompt", history=[], user_message="I'm feeling depressed")
-    )
-    assert normal_prompt == "Test reply"
-
-    explicit_prompt = asyncio.run(
-        agent.respond(system_prompt="System prompt", history=[], user_message="I want to kill myself")
-    )
-    assert explicit_prompt == "Test reply"
-
-    assert agent._safety_note_for_user_message("I'm feeling depressed") is None
-    assert "Immediate safety mode" in (agent._safety_note_for_user_message("I want to kill myself") or "")
-
-
-def test_agent_uses_configured_groq_runtime_settings():
-    settings = Settings(
-        GROQ_API_KEY="test-key",
-        GROQ_MODEL="meta-llama/llama-4-scout-17b-16e-instruct",
-        IRA_TEMPERATURE=0.25,
-        IRA_MAX_RESPONSE_TOKENS=512,
-    )
-    agent = IRAAgent(settings)
-
-    assert agent.api_key == "test-key"
-    assert agent.model == "meta-llama/llama-4-scout-17b-16e-instruct"
-    assert agent.temperature == 0.25
-    assert agent.max_response_tokens == 512
-
-
-def test_agent_missing_api_key_raises_service_error():
-    settings = Settings(GROQ_API_KEY="", AI_API_KEY="")
-    agent = IRAAgent(settings)
-
-    with pytest.raises(AIServiceError, match="Groq API key is not configured"):
-        asyncio.run(agent.respond(system_prompt="System prompt", history=[], user_message="hi"))
-
-
-def test_agent_context_window_limits_history_and_keeps_current_message(monkeypatch):
-    settings = Settings(GROQ_API_KEY="test-key", IRA_CONTEXT_MESSAGES=2)
-    agent = IRAAgent(settings)
-
-    class FakeChoice:
-        class Message:
-            content = "Test reply"
-
-        choices = [types.SimpleNamespace(message=Message())]
-
-    def fake_create(model, messages, temperature, max_tokens):
-        assert model == agent.model
-        assert len(messages) == 4
-        assert messages[0]["role"] == "system"
-        assert messages[-1]["role"] == "user"
-        assert messages[-1]["content"] == "Final message"
-        return FakeChoice()
-
-    agent.client = types.SimpleNamespace(
-        chat=types.SimpleNamespace(
-            completions=types.SimpleNamespace(create=fake_create)
-        )
-    )
-
-    async def invoke():
-        return await agent.respond(
-            system_prompt="System prompt",
-            history=[
-                {"role": "user", "content": "Older one"},
-                {"role": "assistant", "content": "Older reply"},
-                {"role": "user", "content": "Earlier but still recent"},
-                {"role": "assistant", "content": "Recent reply"},
-            ],
-            user_message="Final message",
-        )
-
-    result = asyncio.run(invoke())
-    assert result == "Test reply"

@@ -10,6 +10,8 @@ from app.api.routes.profile import router as profile_router
 from app.api.routes.conversations import router as conversations_router
 from app.api.routes.moods import router as mood_router
 from app.api.routes.voice import router as voice_router
+from app.api.routes.journal import router as journal_router
+from app.api.routes.todos import router as todo_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -59,6 +61,8 @@ app.include_router(profile_router, prefix="/api/v1")
 app.include_router(conversations_router, prefix="/api/v1")
 app.include_router(mood_router, prefix="/api/v1")
 app.include_router(voice_router, prefix="/api/v1")
+app.include_router(journal_router, prefix="/api/v1")
+app.include_router(todo_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])

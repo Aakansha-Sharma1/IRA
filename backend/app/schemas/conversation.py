@@ -40,6 +40,14 @@ class SendMessageRequest(BaseModel):
     content: str = Field(..., min_length=1, max_length=4000)
 
 
+class CrisisAction(BaseModel):
+    type: str = "phone"
+    label: str = "Call Manas"
+    phone: str = ""
+
+
 class SendMessageResponse(BaseModel):
     user_message: MessageResponse
     assistant_message: MessageResponse
+    crisis_detected: bool = False
+    crisis_action: Optional[CrisisAction] = None

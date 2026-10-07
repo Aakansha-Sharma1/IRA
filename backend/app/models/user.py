@@ -52,3 +52,9 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    journal_entries: Mapped[list["JournalEntry"]] = relationship(
+        "JournalEntry", back_populates="user", cascade="all, delete-orphan"
+    )
+    todo_items: Mapped[list["TodoItem"]] = relationship(
+        "TodoItem", back_populates="user", cascade="all, delete-orphan"
+    )

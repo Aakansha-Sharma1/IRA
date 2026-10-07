@@ -26,6 +26,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<UserProfile> createProfile({
     required String displayName,
     String companionName = 'IRA',
+    String? representativeName,
+    String? representativeGender,
     int? age,
     String? gender,
     String pronouns = 'she/her',
@@ -38,6 +40,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
     final payload = {
       'display_name': displayName,
       'companion_name': companionName,
+      if (representativeName != null && representativeName.isNotEmpty)
+        'representative_name': representativeName,
+      if (representativeGender != null && representativeGender.isNotEmpty)
+        'representative_gender': representativeGender,
       if (age != null) 'age': age,
       if (gender != null && gender.isNotEmpty) 'gender': gender,
       'pronouns': pronouns,
@@ -55,6 +61,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<UserProfile> updateProfile({
     String? displayName,
     String? companionName,
+    String? representativeName,
+    String? representativeGender,
     int? age,
     String? gender,
     String? pronouns,
@@ -66,6 +74,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
     final payload = <String, dynamic>{
       if (displayName != null) 'display_name': displayName,
       if (companionName != null) 'companion_name': companionName,
+      if (representativeName != null)
+        'representative_name': representativeName,
+      if (representativeGender != null)
+        'representative_gender': representativeGender,
       if (age != null) 'age': age,
       if (gender != null) 'gender': gender,
       if (pronouns != null) 'pronouns': pronouns,

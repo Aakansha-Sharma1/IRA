@@ -8,11 +8,35 @@ import '../models/conversation_model.dart';
 class SendMessageDto {
   final ChatMessageModel userMessage;
   final ChatMessageModel assistantMessage;
+  final bool crisisDetected;
+  final CrisisActionDto? crisisAction;
 
   const SendMessageDto({
     required this.userMessage,
     required this.assistantMessage,
+    this.crisisDetected = false,
+    this.crisisAction,
   });
+}
+
+class CrisisActionDto {
+  final String type;
+  final String label;
+  final String phone;
+
+  const CrisisActionDto({
+    required this.type,
+    required this.label,
+    required this.phone,
+  });
+
+  factory CrisisActionDto.fromJson(Map<String, dynamic> json) {
+    return CrisisActionDto(
+      type: json['type'] as String? ?? 'phone',
+      label: json['label'] as String? ?? 'Call Manas',
+      phone: json['phone'] as String? ?? '',
+    );
+  }
 }
 
 abstract class ConversationRemoteDataSource {
@@ -100,6 +124,11 @@ class ConversationRemoteDataSourceImpl implements ConversationRemoteDataSource {
       assistantMessage: ChatMessageModel.fromJson(
         data['assistant_message'] as Map<String, dynamic>,
       ),
+      crisisDetected: data['crisis_detected'] as bool? ?? false,
+      crisisAction: data['crisis_action'] is Map<String, dynamic>
+          ? CrisisActionDto.fromJson(
+              data['crisis_action'] as Map<String, dynamic>)
+          : null,
     );
   }
 

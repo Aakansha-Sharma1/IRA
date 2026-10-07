@@ -46,7 +46,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (!mounted) return;
 
     if (success) {
-      context.go(AppRoutes.home);
+      context.go(AppRoutes.chatLanding);
     } else {
       final failure = ref.read(authControllerProvider).failure;
       if (failure != null) {

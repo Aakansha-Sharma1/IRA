@@ -30,6 +30,8 @@ class ProfileService:
             user_id=user_id,
             display_name=req.display_name,
             companion_name=req.companion_name,
+            representative_name=req.representative_name,
+            representative_gender=req.representative_gender,
             age=req.age,
             gender=req.gender,
             pronouns=req.pronouns,

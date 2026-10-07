@@ -44,6 +44,14 @@ class ConversationRepositoryImpl implements ConversationRepository {
     return SendMessageResult(
       userMessage: dto.userMessage.toEntity(),
       assistantMessage: dto.assistantMessage.toEntity(),
+      crisisDetected: dto.crisisDetected,
+      crisisAction: dto.crisisAction == null
+          ? null
+          : CrisisAction(
+              type: dto.crisisAction!.type,
+              label: dto.crisisAction!.label,
+              phone: dto.crisisAction!.phone,
+            ),
     );
   }
 

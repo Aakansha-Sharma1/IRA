@@ -88,8 +88,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         await ref.read(profileControllerProvider.notifier).createProfile(
               displayName: displayName,
               companionName: _companionNameValue(),
+              representativeName: _companionNameValue(),
+              representativeGender: _selectedGender.toLowerCase() == 'non-binary'
+                  ? 'non_binary'
+                  : _selectedGender.toLowerCase(),
               age: ageValue,
-              gender: _selectedGender,
               pronouns: _selectedPronoun,
               timezone: 'UTC',
               wellnessGoals: [_selectedGoal],

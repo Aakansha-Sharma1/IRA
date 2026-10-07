@@ -15,6 +15,7 @@ abstract final class ApiEndpoints {
   static const String moods = '/moods';
   static const String wellnessCheckIn = '/wellness/check-in';
   static const String journal = '/journal';
+  static const String todos = '/todos';
   static String mood(String id) => '/moods/$id';
   static const String goals = '/goals';
 
